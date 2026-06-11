@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PANOPTICORE // EXPERIMENTAL SENSOR SUITE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div id="boot-screen">
+  <div class="boot-content">
+    <div class="boot-logo">PANOPTICORE</div>
+    <div class="boot-sub">// EXPERIMENTAL SENSOR SUITE v2.1</div>
+    <div class="boot-log" id="boot-log"></div>
+    <div class="boot-bar"><div class="boot-fill" id="boot-fill"></div></div>
+  </div>
+</div>
+
+<!-- MAIN HUD -->
+<div id="hud" class="hidden">
+
+  <!-- TOP STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-label">PANOPTICORE // MINDS SIGHT</span>
+    <span class="status-item">CAM: <span id="sb-cam">OFFLINE</span></span>
+    <span class="status-item">FPS: <span id="sb-fps">0</span></span>
+    <span class="status-item">DETECTIONS: <span id="sb-det">0</span></span>
+    <span class="status-item">TARGETS: <span id="sb-targets">0</span></span>
+    <span class="status-item">GPS: <span id="sb-gps">--</span></span>
+    <span class="status-item">REC: <span id="sb-rec" class="rec-off">OFF</span></span>
+    <span class="status-time" id="sb-time">00:00:00</span>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="hud-layout">
+
+    <!-- LEFT PANEL: TELEMETRY -->
+    <div class="panel panel-left" id="panel-telemetry">
+      <div class="panel-header">▶ TELEMETRY</div>
+      <div class="telem-row">SCAN MODE: <span class="telem-val" id="t-scanmode">UFO MICRO</span></div>
+      <div class="telem-row">RENDER: <span class="telem-val">SAME FRAME</span></div>
+      <div class="telem-row">THRESH: <span class="telem-val" id="t-thresh">60</span></div>
+      <div class="telem-row">POINTS: <span class="telem-val" id="t-points">0</span></div>
+      <div class="telem-row">ACTIVE: <span class="telem-val" id="t-active">0</span></div>
+      <div class="telem-row">MOTION: <span class="telem-val" id="t-motion">IDLE</span></div>
+      <div class="telem-row">AUTOLOCK: <span class="telem-val" id="t-autolock">OFF</span></div>
+      <div class="telem-row">MODEL: <span class="telem-val" id="t-model">LOADING</span></div>
+      <div class="telem-row">PITCH: <span class="telem-val" id="t-pitch">0.0°</span></div>
+      <div class="telem-row">ROLL: <span class="telem-val" id="t-roll">0.0°</span></div>
+      <div class="telem-row">HEADING: <span class="telem-val" id="t-heading">--°</span></div>
+      <div class="telem-row">LAT: <span class="telem-val" id="t-lat">--</span></div>
+      <div class="telem-row">LON: <span class="telem-val" id="t-lon">--</span></div>
+      <div class="telem-row">ELAPSED: <span class="telem-val" id="t-elapsed">00:00</span></div>
+      <div class="telem-row">SESSION: <span class="telem-val" id="t-session">--</span></div>
+      <div class="panel-header" style="margin-top:8px">▶ OBJECT LOG</div>
+      <div id="object-log"></div>
+    </div>
+
+    <!-- CENTER: MAIN CAMERA FEED -->
+    <div class="panel panel-center">
+      <div class="cam-container" id="cam-container">
+        <video id="cam-video" autoplay muted playsinline></video>
+        <canvas id="cam-overlay"></canvas>
+
+        <!-- RETICLE -->
+        <div class="reticle" id="reticle">
+          <div class="reticle-h"></div>
+          <div class="reticle-v"></div>
+          <div class="reticle-circle"></div>
+        </div>
+
+        <!-- LOCK INDICATOR -->
+        <div class="lock-indicator hidden" id="lock-indicator">
+          <div class="lock-box" id="lock-box"></div>
+          <div class="lock-label" id="lock-label">LOCKED</div>
+        </div>
+
+        <!-- CORNER BRACKETS -->
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+
+        <!-- CAM OFFLINE OVERLAY -->
+        <div class="cam-offline" id="cam-offline">
+          <div>■ CAMERA OFFLINE</div>
+          <div style="font-size:11px;margin-top:8px;">CLICK "START CAM" TO INITIALIZE</div>
+        </div>
+
+        <!-- SCAN LINES -->
+        <div class="scanlines"></div>
+
+        <!-- TOP-LEFT MINI STATUS -->
+        <div class="cam-status-tl">
+          <span id="cs-mode">STANDBY</span> // <span id="cs-fps">0</span> FPS
+        </div>
+        <!-- BOTTOM-LEFT MINI STATUS -->
+        <div class="cam-status-bl" id="cs-det-count">DETECTIONS: 0</div>
+      </div>
+
+      <!-- MINI CAMERA FEEDS ROW -->
+      <div class="mini-feeds">
+        <div class="mini-feed" id="mini-feed-motion">
+          <canvas id="mini-canvas-motion"></canvas>
+          <div class="mini-label">MOTION DELTA</div>
+        </div>
+        <div class="mini-feed" id="mini-feed-zoom">
+          <canvas id="mini-canvas-zoom"></canvas>
+          <div class="mini-label">TARGET ZOOM</div>
+        </div>
+        <div class="mini-feed" id="mini-feed-edge">
+          <canvas id="mini-canvas-edge"></canvas>
+          <div class="mini-label">EDGE DETECT</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: RADAR + TOOLS -->
+    <div class="panel panel-right">
+      <div class="panel-header">▶ RADAR / MAP</div>
+      <canvas id="radar-canvas" width="200" height="200"></canvas>
+      <div id="gps-info">
+        <div class="telem-row">LAT: <span class="telem-val" id="r-lat">--</span></div>
+        <div class="telem-row">LON: <span class="telem-val" id="r-lon">--</span></div>
+        <div class="telem-row">ACC: <span class="telem-val" id="r-acc">--m</span></div>
+      </div>
+
+      <div class="panel-header" style="margin-top:8px">▶ DETECTION HISTORY</div>
+      <div id="det-history"></div>
+
+      <div class="panel-header" style="margin-top:8px">▶ CONTROLS</div>
+      <div class="ctrl-grid">
+        <button class="ctrl-btn" id="btn-start-cam">START CAM</button>
+        <button class="ctrl-btn" id="btn-autolock">AUTO LOCK</button>
+        <button class="ctrl-btn" id="btn-record">RECORD</button>
+        <button class="ctrl-btn" id="btn-report">REPORT</button>
+        <button class="ctrl-btn" id="btn-clear-scan">CLEAR SCAN</button>
+        <button class="ctrl-btn" id="btn-save-gif">SAVE GIF</button>
+        <button class="ctrl-btn" id="btn-gps">GPS ON</button>
+        <button class="ctrl-btn" id="btn-heatmap">HEATMAP</button>
+      </div>
+
+      <div class="panel-header" style="margin-top:8px">▶ SENSITIVITY</div>
+      <div class="slider-row">
+        <label>CONFIDENCE: <span id="lbl-conf">60%</span></label>
+        <input type="range" id="sl-conf" min="10" max="95" value="60">
+      </div>
+      <div class="slider-row">
+        <label>MOTION SENS: <span id="lbl-motion">30</span></label>
+        <input type="range" id="sl-motion" min="1" max="100" value="30">
+      </div>
+      <div class="slider-row">
+        <label>ZOOM: <span id="lbl-zoom">1.0x</span></label>
+        <input type="range" id="sl-zoom" min="10" max="40" value="10">
+      </div>
+    </div>
+
+  </div><!-- end hud-layout -->
+
+  <!-- BOTTOM TOOLBAR -->
+  <div class="toolbar">
+    <div class="tb-group">
+      <button class="tb-btn active" id="tb-tracking">TRACKING</button>
+      <button class="tb-btn" id="tb-yolo">YOLO</button>
+      <button class="tb-btn" id="tb-heatmap-tb">HEATMAP</button>
+      <button class="tb-btn" id="tb-motion">MOTION ARR</button>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn" id="tb-radar">RADAR</button>
+      <button class="tb-btn" id="tb-gps-tb">GPS MAP</button>
+      <button class="tb-btn" id="tb-report-tb">REPORT</button>
+      <button class="tb-btn" id="tb-rec-tb">● REC</button>
+    </div>
+    <div class="tb-status">
+      MODEL: <span id="tb-model-status">LOADING...</span>
+    </div>
+  </div>
+
+</div><!-- end hud -->
+
+<!-- REPORT MODAL -->
+<div id="report-modal" class="modal hidden">
+  <div class="modal-inner">
+    <div class="modal-header">
+      PANOPTICORE // GENERATED UNIQUE-TRACK REPORT
+      <button class="modal-close" id="report-close">✕</button>
+    </div>
+    <div class="modal-body" id="report-body"></div>
+    <div class="modal-footer">
+      <button class="ctrl-btn" id="btn-dl-report">DOWNLOAD TXT</button>
+      <button class="ctrl-btn" id="btn-dl-json">DOWNLOAD JSON</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/radar.js"></script>
+<script src="js/tracker.js"></script>
+<script src="js/detector.js"></script>
+<script src="js/recorder.js"></script>
+<script src="js/report.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
